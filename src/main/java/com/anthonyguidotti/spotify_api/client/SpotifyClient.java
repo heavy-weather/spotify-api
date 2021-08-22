@@ -90,10 +90,9 @@ public class SpotifyClient {
     }
 
     public HttpResponse<AccessTokenResponse> accessTokenSync(String code) {
-        HttpRequest request = accessTokenRequest(code);
         try {
             return client.send(
-                    request,
+                    accessTokenRequest(code),
                     (ri) -> new JacksonDeserializerBodySubscriber<>(AccessTokenResponse.class)
             );
         } catch (IOException | InterruptedException e) {
@@ -102,10 +101,10 @@ public class SpotifyClient {
         }
     }
 
-    public CompletableFuture<HttpResponse<String>> accessTokenAsync(String code) {
+    public CompletableFuture<HttpResponse<AccessTokenResponse>> accessTokenAsync(String code) {
         return client.sendAsync(
                 accessTokenRequest(code),
-                null
+                (ri) -> new JacksonDeserializerBodySubscriber<>(AccessTokenResponse.class)
         );
     }
 
