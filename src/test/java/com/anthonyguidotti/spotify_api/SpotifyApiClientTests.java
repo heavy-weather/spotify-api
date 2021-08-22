@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.http.HttpResponse;
@@ -60,7 +61,7 @@ class SpotifyApiClientTests {
 						authentication.setAccessnToken(response.body().getAccessToken());
 					}
 				}
-			} catch (MalformedURLException | InterruptedException e) {
+			} catch (IOException | InterruptedException e) {
 				throw new RuntimeException("Error bootstrapping test", e);
 			}
 		}

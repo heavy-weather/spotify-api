@@ -89,16 +89,11 @@ public class SpotifyClient {
                 .build();
     }
 
-    public HttpResponse<AccessTokenResponse> accessTokenSync(String code) {
-        try {
-            return client.send(
-                    accessTokenRequest(code),
-                    (ri) -> new JacksonDeserializerBodySubscriber<>(AccessTokenResponse.class)
-            );
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public HttpResponse<AccessTokenResponse> accessTokenSync(String code) throws IOException, InterruptedException {
+        return client.send(
+                accessTokenRequest(code),
+                (ri) -> new JacksonDeserializerBodySubscriber<>(AccessTokenResponse.class)
+        );
     }
 
     public CompletableFuture<HttpResponse<AccessTokenResponse>> accessTokenAsync(String code) {
