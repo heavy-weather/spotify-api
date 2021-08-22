@@ -195,4 +195,12 @@ public class EpisodeBase implements TrackOrEpisode {
     public void setUri(String uri) {
         this.uri = uri;
     }
+
+    public ShowBase getShow() {
+        return show;
+    }
+
+    public void setShow(ShowBase show) {
+        this.show = show;
+    }
 }

@@ -1,8 +1,8 @@
 package com.anthonyguidotti.spotify_api.client;
 
+import com.anthonyguidotti.spotify_api.jackson.JacksonDeserializerBodySubscriber;
 import com.anthonyguidotti.spotify_api.model.AuthorizationScope;
 import com.anthonyguidotti.spotify_api.response.AccessTokenResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;

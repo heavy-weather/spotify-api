@@ -1,4 +1,4 @@
-package com.anthonyguidotti.spotify_api.client;
+package com.anthonyguidotti.spotify_api.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Flow;
 
-class JacksonDeserializerBodySubscriber<T> implements HttpResponse.BodySubscriber<T> {
+public class JacksonDeserializerBodySubscriber<T> implements HttpResponse.BodySubscriber<T> {
     private static final Logger logger = LoggerFactory.getLogger(JacksonDeserializerBodySubscriber.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
