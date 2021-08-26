@@ -1,5 +1,8 @@
 package com.anthonyguidotti.spotify_api.jackson;
 
+import com.anthonyguidotti.spotify_api.response.ErrorResponse;
+import com.anthonyguidotti.spotify_api.response.SpotifyAPIResponse;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,21 +16,21 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Flow;
 
-public class JacksonDeserializerBodySubscriber<T> implements HttpResponse.BodySubscriber<T> {
+public class JacksonDeserializerBodySubscriber implements HttpResponse.BodySubscriber<SpotifyAPIResponse> {
     private static final Logger logger = LoggerFactory.getLogger(JacksonDeserializerBodySubscriber.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private List<ByteBuffer> response;
-    private final CompletableFuture<T> future = new CompletableFuture<>();
-    private final Class<T> type;
+    private final CompletableFuture<SpotifyAPIResponse> future = new CompletableFuture<>();
+    private final Class<? extends SpotifyAPIResponse> type;
     private volatile Flow.Subscription subscription;
 
-    public JacksonDeserializerBodySubscriber(Class<T> type) {
+    public JacksonDeserializerBodySubscriber(Class<? extends SpotifyAPIResponse> type) {
         this.type = type;
     }
 
     @Override
-    public CompletionStage<T> getBody() {
+    public CompletionStage<SpotifyAPIResponse> getBody() {
         return future;
     }
 
@@ -70,7 +73,12 @@ public class JacksonDeserializerBodySubscriber<T> implements HttpResponse.BodySu
         }
 
         try {
-            future.complete(objectMapper.readValue(bytes, type));
+            JsonNode json = objectMapper.readTree(bytes);
+            if (json.has("error")) {
+                future.complete(objectMapper.readValue(bytes, ErrorResponse.class));
+            } else {
+                future.complete(objectMapper.readValue(bytes, type));
+            }
         } catch (IOException e) {
             logger.error("Could not deserialize response body into {}", type, e);
             future.complete(null);

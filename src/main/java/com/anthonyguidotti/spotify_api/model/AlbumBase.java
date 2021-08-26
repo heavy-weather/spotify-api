@@ -31,6 +31,7 @@ public class AlbumBase {
     private CursorPagingObject<SimplifiedTrackObject> tracks;
     private String type;
     private String uri;
+    private String label;
 
     public String getAlbumType() {
         return albumType;
@@ -174,5 +175,13 @@ public class AlbumBase {
 
     public void setTracks(CursorPagingObject<SimplifiedTrackObject> tracks) {
         this.tracks = tracks;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

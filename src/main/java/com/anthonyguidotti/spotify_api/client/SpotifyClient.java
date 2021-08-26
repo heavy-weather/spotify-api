@@ -3,6 +3,8 @@ package com.anthonyguidotti.spotify_api.client;
 import com.anthonyguidotti.spotify_api.jackson.JacksonDeserializerBodySubscriber;
 import com.anthonyguidotti.spotify_api.model.AuthorizationScope;
 import com.anthonyguidotti.spotify_api.response.AccessTokenResponse;
+import com.anthonyguidotti.spotify_api.response.MultipleAlbumsResponse;
+import com.anthonyguidotti.spotify_api.response.SpotifyAPIResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
@@ -27,7 +29,6 @@ public class SpotifyClient {
     private final String clientId;
     private final String clientSecret;
     private final String redirectUri;
-    private final String authHeader;
     private final HttpClient client;
 
     public SpotifyClient(
@@ -44,9 +45,6 @@ public class SpotifyClient {
         this.redirectUri = redirectUri;
 
         client = HttpClient.newHttpClient();
-
-        byte[] bearerNotEncoded = (clientId + ":" + clientSecret).getBytes();
-        authHeader = "Basic " + new String(Base64Utils.encode(bearerNotEncoded));
     }
 
     public URL authorizationCodeUrl(
@@ -70,13 +68,16 @@ public class SpotifyClient {
             sb.append("&scope=").append(URLEncoder.encode(scopesValue, charset));
         }
         if (showDialogue) {
-            sb.append("&show_dialogue=true");
+            sb.append("&show_dialog=true");
         }
 
         return new URL(sb.toString());
     }
 
     private HttpRequest accessTokenRequest(String code) {
+        byte[] headerBytes = (clientId + ":" + clientSecret).getBytes();
+        String authHeader = "Basic " + new String(Base64Utils.encode(headerBytes));
+
         return HttpRequest.newBuilder()
                 .uri(httpsUri(authorizationUrl, "/api/token"))
                 .header("Authorization", authHeader)
@@ -89,17 +90,60 @@ public class SpotifyClient {
                 .build();
     }
 
-    public HttpResponse<AccessTokenResponse> accessTokenSync(String code) throws IOException, InterruptedException {
+    public HttpResponse<SpotifyAPIResponse> accessTokenSync(String code) throws IOException, InterruptedException {
         return client.send(
                 accessTokenRequest(code),
-                (ri) -> new JacksonDeserializerBodySubscriber<>(AccessTokenResponse.class)
+                (ri) -> new JacksonDeserializerBodySubscriber(AccessTokenResponse.class)
         );
     }
 
-    public CompletableFuture<HttpResponse<AccessTokenResponse>> accessTokenAsync(String code) {
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> accessTokenAsync(String code) {
         return client.sendAsync(
                 accessTokenRequest(code),
-                (ri) -> new JacksonDeserializerBodySubscriber<>(AccessTokenResponse.class)
+                (ri) -> new JacksonDeserializerBodySubscriber(AccessTokenResponse.class)
+        );
+    }
+
+    private HttpRequest multipleAlbumsRequest(
+            String accessToken,
+            List<String> albumIds
+    ) {
+        URI uri;
+        if (albumIds != null && albumIds.size() > 0) {
+            String[] idParam = new String[albumIds.size() + 1];
+            idParam[0] = "ids";
+            for (int i = 0; i < albumIds.size(); i++) {
+                idParam[i + 1] = albumIds.get(i);
+            }
+            uri = httpsUri(apiUrl, "/albums", idParam);
+        } else {
+            uri = httpsUri(apiUrl, "/albums");
+        }
+
+        return HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+    }
+
+    public HttpResponse<SpotifyAPIResponse> multipleAlbumsSync(
+            String accessToken,
+            List<String> albumIds
+    ) throws IOException, InterruptedException {
+        return client.send(
+                multipleAlbumsRequest(accessToken, albumIds),
+                (ri) -> new JacksonDeserializerBodySubscriber(MultipleAlbumsResponse.class)
+        );
+    }
+
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> multipleAlbumsAsync(
+            String accessToken,
+            List<String> albumIds
+    ) {
+        return client.sendAsync(
+                multipleAlbumsRequest(accessToken, albumIds),
+                (ri) -> new JacksonDeserializerBodySubscriber(MultipleAlbumsResponse.class)
         );
     }
 
@@ -109,27 +153,26 @@ public class SpotifyClient {
             query = "?" + urlEncodedKeyValueString(queryParams);
         }
 
-        // Catch URISyntaxException so this doesn't need to be handled by endpoint methods
-        try {
-            return new URI("https", host, path, query);
-        } catch (URISyntaxException e) {
-            logger.error(
-                    "Could not build URI with parameters scheme: {}, host: {}, path: {}, query: {}",
-                    "http", host, path, query, e
-            );
-            throw new RuntimeException(e);
-        }
+        return URI.create("https://" + host + path + query);
     }
 
     private String urlEncodedKeyValueString(String[] ... queryParams) {
         StringBuilder qs = new StringBuilder();
         for (String[] queryParam : queryParams) {
+            if (queryParam.length == 0) {
+                throw new IllegalArgumentException("Each query param array must have at least 1 argument");
+            }
             if (qs.length() > 0) {
                 qs.append('&');
             }
-            qs.append(URLEncoder.encode(queryParam[0], Charset.defaultCharset()))
-                    .append('=')
-                    .append(URLEncoder.encode(queryParam[1], Charset.defaultCharset()));
+
+            qs.append(URLEncoder.encode(queryParam[0], Charset.defaultCharset())).append('=');
+            for (int i = 1; i < queryParam.length; i++) {
+                qs.append(URLEncoder.encode(queryParam[i], Charset.defaultCharset()));
+                if (i < queryParam.length - 1) {
+                    qs.append(',');
+                }
+            }
         }
         return qs.toString();
     }

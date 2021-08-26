@@ -2,7 +2,7 @@ package com.anthonyguidotti.spotify_api.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AccessTokenResponse {
+public class AccessTokenResponse implements SpotifyAPIResponse {
     @JsonProperty("access_token")
     private String accessToken;
     @JsonProperty("token_type")

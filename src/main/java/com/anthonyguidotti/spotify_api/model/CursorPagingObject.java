@@ -8,7 +8,9 @@ public class CursorPagingObject<T> {
     private List<T> items;
     private Integer limit;
     private String next;
+    private String previous;
     private Integer total;
+    private Integer offset;
 
     public CursorObject getCursors() {
         return cursors;
@@ -56,5 +58,21 @@ public class CursorPagingObject<T> {
 
     public void setTotal(Integer total) {
         this.total = total;
+    }
+
+    public Integer getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Integer offset) {
+        this.offset = offset;
+    }
+
+    public String getPrevious() {
+        return previous;
+    }
+
+    public void setPrevious(String previous) {
+        this.previous = previous;
     }
 }
