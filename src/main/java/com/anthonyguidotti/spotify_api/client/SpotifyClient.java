@@ -2,9 +2,9 @@ package com.anthonyguidotti.spotify_api.client;
 
 import com.anthonyguidotti.spotify_api.jackson.JacksonDeserializerBodySubscriber;
 import com.anthonyguidotti.spotify_api.model.AuthorizationScope;
-import com.anthonyguidotti.spotify_api.response.AccessTokenResponse;
-import com.anthonyguidotti.spotify_api.response.MultipleAlbumsResponse;
-import com.anthonyguidotti.spotify_api.response.SpotifyAPIResponse;
+import com.anthonyguidotti.spotify_api.model.CursorPagingObject;
+import com.anthonyguidotti.spotify_api.model.SimplifiedTrackObject;
+import com.anthonyguidotti.spotify_api.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
@@ -147,6 +147,100 @@ public class SpotifyClient {
         );
     }
 
+    private HttpRequest singleAlbumRequest(
+            String accessToken,
+            String albumId,
+            String market
+    ) {
+        if (!StringUtils.hasLength(albumId)) {
+            throw new IllegalArgumentException("Parameter albumId is required");
+        }
+        return HttpRequest.newBuilder()
+                .uri(httpsUri(
+                        apiUrl,
+                        "/albums/" + albumId,
+                        new String[] {"market", market}
+                ))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+    }
+
+    public HttpResponse<SpotifyAPIResponse> singleAlbumSync(
+            String accessToken,
+            String albumId,
+            String market
+    ) throws IOException, InterruptedException {
+        return client.send(
+                singleAlbumRequest(accessToken, albumId, market),
+                (ri) -> new JacksonDeserializerBodySubscriber(SingleAlbumResponse.class)
+        );
+    }
+
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> singleAlbumAsync(
+            String accessToken,
+            String albumId,
+            String market
+    ) {
+        return client.sendAsync(
+                singleAlbumRequest(accessToken, albumId, market),
+                (ri) -> new JacksonDeserializerBodySubscriber(SingleAlbumResponse.class)
+        );
+    }
+
+    private HttpRequest albumTracksRequest(
+            String accessToken,
+            String albumId,
+            String market,
+            int limit,
+            int offset
+    ) {
+        if (!StringUtils.hasLength(albumId)) {
+            throw new IllegalArgumentException("Parameter albumId is required");
+        }
+        String limitString = null;
+        if (offset > 0) {
+            limitString = String.valueOf(limit);
+        }
+        return HttpRequest.newBuilder()
+                .uri(httpsUri(
+                        apiUrl,
+                        "/albums/" + albumId + "/tracks",
+                        new String[] {"market", market},
+                        new String[] {"limit", limitString},
+                        new String[] {"offset", String.valueOf(offset)}
+                ))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+    }
+
+    public HttpResponse<SpotifyAPIResponse> albumTracksSync(
+            String accessToken,
+            String albumId,
+            String market,
+            int limit,
+            int offset
+    ) throws IOException, InterruptedException {
+        return client.send(
+                albumTracksRequest(accessToken, albumId, market, limit, offset),
+                (ri) -> new JacksonDeserializerBodySubscriber(AlbumTracksResponse.class)
+        );
+    }
+
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> albumTracksAsync(
+            String accessToken,
+            String albumId,
+            String market,
+            int limit,
+            int offset
+    ) {
+        return client.sendAsync(
+                albumTracksRequest(accessToken, albumId, market, limit, offset),
+                (ri) -> new JacksonDeserializerBodySubscriber(AlbumTracksResponse.class)
+        );
+    }
+
     private URI httpsUri(String host, String path, String[] ... queryParams) {
         String query = "";
         if (queryParams.length > 0) {
@@ -159,8 +253,8 @@ public class SpotifyClient {
     private String urlEncodedKeyValueString(String[] ... queryParams) {
         StringBuilder qs = new StringBuilder();
         for (String[] queryParam : queryParams) {
-            if (queryParam.length == 0) {
-                throw new IllegalArgumentException("Each query param array must have at least 1 argument");
+            if (queryParam.length < 2 || queryParam[1] == null) {
+                continue;
             }
             if (qs.length() > 0) {
                 qs.append('&');
