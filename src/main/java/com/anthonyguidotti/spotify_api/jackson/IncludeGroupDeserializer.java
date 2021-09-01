@@ -1,6 +1,6 @@
 package com.anthonyguidotti.spotify_api.jackson;
 
-import com.anthonyguidotti.spotify_api.model.RestrictionReason;
+import com.anthonyguidotti.spotify_api.model.IncludeGroup;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -8,22 +8,21 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
 
-public class RestrictionReasonDeserializer extends StdDeserializer<RestrictionReason> {
+public class IncludeGroupDeserializer extends StdDeserializer<IncludeGroup> {
 
-    protected RestrictionReasonDeserializer() {
+    protected IncludeGroupDeserializer() {
         this(null);
     }
-
-    protected RestrictionReasonDeserializer(Class<?> vc) {
+    protected IncludeGroupDeserializer(Class<?> vc) {
         super(vc);
     }
 
     @Override
-    public RestrictionReason deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public IncludeGroup deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
         String data = p.getCodec().readValue(p, String.class);
-        for (RestrictionReason reason : RestrictionReason.values()) {
-            if (reason.getName().equals(data)) {
-                return reason;
+        for (IncludeGroup includeGroup : IncludeGroup.values()) {
+            if (includeGroup.getName().equals(data)) {
+                return includeGroup;
             }
         }
 

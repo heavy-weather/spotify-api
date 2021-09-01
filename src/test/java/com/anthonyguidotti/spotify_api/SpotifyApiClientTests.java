@@ -2,6 +2,7 @@ package com.anthonyguidotti.spotify_api;
 
 import com.anthonyguidotti.spotify_api.client.SpotifyClient;
 import com.anthonyguidotti.spotify_api.model.AuthorizationScope;
+import com.anthonyguidotti.spotify_api.model.IncludeGroup;
 import com.anthonyguidotti.spotify_api.response.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ class SpotifyApiClientTests {
 
 	// Constants
 	private final String ALBUM_ID = "382ObEPsp2rxGrnsizN5TX";
+	private final String ARTIST_ID = "2CIMQHirSU0MQqyYHq0eOx";
 
 	@Autowired
 	public SpotifyApiClientTests(SpotifyClient spotifyClient, Authentication authentication) {
@@ -78,7 +80,7 @@ class SpotifyApiClientTests {
 	}
 
 	@Test
-	public void multipleAlbumsAsync() throws ExecutionException, InterruptedException {
+	public void multipleAlbums() throws ExecutionException, InterruptedException {
 		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.multipleAlbums(
 				authentication.getAccessnToken(), Collections.singletonList(ALBUM_ID)
 		);
@@ -95,7 +97,7 @@ class SpotifyApiClientTests {
 	}
 
 	@Test
-	public void singleAlbumsAsync() throws ExecutionException, InterruptedException {
+	public void singleAlbums() throws ExecutionException, InterruptedException {
 		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.singleAlbum(
 				authentication.getAccessnToken(), ALBUM_ID, "ES");
 
@@ -110,7 +112,7 @@ class SpotifyApiClientTests {
 	}
 
 	@Test
-	public void albumTracksAsync() throws ExecutionException, InterruptedException {
+	public void albumTracks() throws ExecutionException, InterruptedException {
 		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.albumTracks(
 				authentication.getAccessnToken(), ALBUM_ID, null, 0, 0);
 
@@ -123,5 +125,91 @@ class SpotifyApiClientTests {
 		AlbumTracksResponse body = (AlbumTracksResponse) spotifyAPIResponse;
 		Assert.notEmpty(body.getItems(), "Body must contain access token");
 		Assert.notNull(body.getItems().get(0), "Body must contain at least one track");
+	}
+
+	@Test
+	public void multipleArtists() throws ExecutionException, InterruptedException {
+		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.multipleArtists(
+				authentication.getAccessnToken(), Collections.singletonList(ARTIST_ID)
+		);
+
+		HttpResponse<SpotifyAPIResponse> response = future.get();
+
+		Assert.isTrue(response.statusCode() == 200, "Response must be successful");
+		Assert.notNull(response.body(), "Body must not be null");
+
+		SpotifyAPIResponse spotifyAPIResponse = response.body();
+		MultipleArtistsResponse body = (MultipleArtistsResponse) spotifyAPIResponse;
+		Assert.notEmpty(body.getArtists(), "Body must contain access token");
+		Assert.notNull(body.getArtists().get(0), "Body must contain at least one album");
+	}
+
+	@Test
+	public void singleArtist() throws ExecutionException, InterruptedException {
+		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.singleArtist(
+				authentication.getAccessnToken(), ARTIST_ID
+		);
+
+		HttpResponse<SpotifyAPIResponse> response = future.get();
+
+		Assert.isTrue(response.statusCode() == 200, "Response must be successful");
+		Assert.notNull(response.body(), "Body must not be null");
+
+		SpotifyAPIResponse spotifyAPIResponse = response.body();
+		SingleArtistResponse body = (SingleArtistResponse) spotifyAPIResponse;
+		Assert.isTrue(StringUtils.hasLength(body.getId()), "Body must contain at least one album");
+	}
+
+	@Test
+	public void artistTopTracks() throws ExecutionException, InterruptedException {
+		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.artistTopTracks(
+				authentication.getAccessnToken(), ARTIST_ID, "US"
+		);
+
+		HttpResponse<SpotifyAPIResponse> response = future.get();
+
+		Assert.isTrue(response.statusCode() == 200, "Response must be successful");
+		Assert.notNull(response.body(), "Body must not be null");
+
+		SpotifyAPIResponse spotifyAPIResponse = response.body();
+		ArtistTopTracksResponse body = (ArtistTopTracksResponse) spotifyAPIResponse;
+		Assert.notEmpty(body.getTracks(), "Body must contain at least one album");
+	}
+
+	@Test
+	public void artistRelatedArtists() throws ExecutionException, InterruptedException {
+		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.artistRelatedArtists(
+				authentication.getAccessnToken(), ARTIST_ID
+		);
+
+		HttpResponse<SpotifyAPIResponse> response = future.get();
+
+		Assert.isTrue(response.statusCode() == 200, "Response must be successful");
+		Assert.notNull(response.body(), "Body must not be null");
+
+		SpotifyAPIResponse spotifyAPIResponse = response.body();
+		ArtistRelatedArtistsResponse body = (ArtistRelatedArtistsResponse) spotifyAPIResponse;
+		Assert.notEmpty(body.getArtists(), "Body must contain at least one album");
+	}
+
+	@Test
+	public void artistAlbums() throws ExecutionException, InterruptedException {
+		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.artistAlbums(
+				authentication.getAccessnToken(),
+				"0TnOYISbd1XYRBk9myaseg",
+				Arrays.asList(IncludeGroup.SINGLE, IncludeGroup.APPEARS_ON),
+				"ES",
+				0,
+				0
+		);
+
+		HttpResponse<SpotifyAPIResponse> response = future.get();
+
+		Assert.isTrue(response.statusCode() == 200, "Response must be successful");
+		Assert.notNull(response.body(), "Body must not be null");
+
+		SpotifyAPIResponse spotifyAPIResponse = response.body();
+		ArtistAlbumsResponse body = (ArtistAlbumsResponse) spotifyAPIResponse;
+		Assert.notEmpty(body.getItems(), "Body must contain at least one album");
 	}
 }

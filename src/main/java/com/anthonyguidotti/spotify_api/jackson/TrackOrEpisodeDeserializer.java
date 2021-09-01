@@ -15,6 +15,10 @@ import java.io.IOException;
 public class TrackOrEpisodeDeserializer extends StdDeserializer<TrackOrEpisode> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    protected TrackOrEpisodeDeserializer() {
+        this(null);
+    }
+
     protected TrackOrEpisodeDeserializer(Class<?> vc) {
         super(vc);
     }

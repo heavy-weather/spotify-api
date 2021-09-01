@@ -7,6 +7,8 @@ import java.util.List;
 public class AlbumBase {
     @JsonProperty("album_type")
     private String albumType;
+    @JsonProperty("album_group")
+    private IncludeGroup albumGroup;
     private List<SimplifiedArtistObject> artists;
     @JsonProperty("available_markets")
     private List<String> availableMarkets;
@@ -183,5 +185,13 @@ public class AlbumBase {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public IncludeGroup getAlbumGroup() {
+        return albumGroup;
+    }
+
+    public void setAlbumGroup(IncludeGroup albumGroup) {
+        this.albumGroup = albumGroup;
     }
 }

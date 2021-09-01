@@ -3,6 +3,7 @@ package com.anthonyguidotti.spotify_api.client;
 import com.anthonyguidotti.spotify_api.jackson.JacksonDeserializerBodySubscriber;
 import com.anthonyguidotti.spotify_api.model.AuthorizationScope;
 import com.anthonyguidotti.spotify_api.model.CursorPagingObject;
+import com.anthonyguidotti.spotify_api.model.IncludeGroup;
 import com.anthonyguidotti.spotify_api.model.SimplifiedTrackObject;
 import com.anthonyguidotti.spotify_api.response.*;
 import org.slf4j.Logger;
@@ -171,6 +172,135 @@ public class SpotifyClient {
                 (ri) -> new JacksonDeserializerBodySubscriber(AlbumTracksResponse.class)
         );
     }
+
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> multipleArtists(
+            String accessToken,
+            List<String> artistIds
+    ) {
+        URI uri;
+        if (artistIds != null && artistIds.size() > 0) {
+            String[] idParam = new String[artistIds.size() + 1];
+            idParam[0] = "ids";
+            for (int i = 0; i < artistIds.size(); i++) {
+                idParam[i + 1] = artistIds.get(i);
+            }
+            uri = httpsUri(apiUrl, "/artists", idParam);
+        } else {
+            uri = httpsUri(apiUrl, "/artists");
+        }
+
+        return client.sendAsync(
+                HttpRequest.newBuilder()
+                        .uri(uri)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build(),
+                (ri) -> new JacksonDeserializerBodySubscriber(MultipleArtistsResponse.class)
+        );
+    }
+
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> singleArtist(
+            String accessToken,
+            String artistId
+    ) {
+        if (!StringUtils.hasLength(artistId)) {
+            throw new IllegalArgumentException("Parameter artistId is required");
+        }
+        return client.sendAsync(
+                HttpRequest.newBuilder()
+                        .uri(httpsUri(apiUrl, "/artists/" + artistId))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build(),
+                (ri) -> new JacksonDeserializerBodySubscriber(SingleArtistResponse.class)
+        );
+    }
+
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> artistTopTracks(
+            String accessToken,
+            String artistId,
+            String market
+    ) {
+        if (!StringUtils.hasLength(artistId)) {
+            throw new IllegalArgumentException("Parameter artistId is required");
+        }
+        return client.sendAsync(
+                HttpRequest.newBuilder()
+                        .uri(httpsUri(
+                                apiUrl,
+                                "/artists/" + artistId + "/top-tracks",
+                                new String[] {"market", market}
+                        ))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build(),
+                (ri) -> new JacksonDeserializerBodySubscriber(ArtistTopTracksResponse.class)
+        );
+    }
+
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> artistRelatedArtists(
+            String accessToken,
+            String artistId
+    ) {
+        if (!StringUtils.hasLength(artistId)) {
+            throw new IllegalArgumentException("Parameter artistId is required");
+        }
+        return client.sendAsync(
+                HttpRequest.newBuilder()
+                        .uri(httpsUri(apiUrl, "/artists/" + artistId + "/related-artists"))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build(),
+                (ri) -> new JacksonDeserializerBodySubscriber(ArtistRelatedArtistsResponse.class)
+        );
+    }
+
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> artistAlbums(
+            String accessToken,
+            String artistId,
+            List<IncludeGroup> includeGroups,
+            String market,
+            int limit,
+            int offset
+    ) {
+        if (!StringUtils.hasLength(artistId)) {
+            throw new IllegalArgumentException("Parameter artistId is required");
+        }
+        String limitString = null;
+        if (offset > 0) {
+            limitString = String.valueOf(limit);
+        }
+
+        String[] incGroupsParam;
+        if (includeGroups != null && includeGroups.size() > 0) {
+            incGroupsParam = new String[includeGroups.size() + 1];
+            incGroupsParam[0] = "ids";
+            for (int i = 0; i < includeGroups.size(); i++) {
+                incGroupsParam[i + 1] = includeGroups.get(i).getName();
+            }
+        } else {
+            incGroupsParam = null;
+        }
+
+        return client.sendAsync(
+                HttpRequest.newBuilder()
+                        .uri(httpsUri(
+                                apiUrl,
+                                "/artists/" + artistId + "/albums",
+
+                                new String[] {"market", market},
+                                incGroupsParam,
+                                new String[] {"limit", limitString},
+                                new String[] {"offset", String.valueOf(offset)}
+                        ))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build(),
+                (ri) -> new JacksonDeserializerBodySubscriber(ArtistAlbumsResponse.class)
+        );
+    }
+
+
 
     private URI httpsUri(String host, String path, String[] ... queryParams) {
         String query = "";

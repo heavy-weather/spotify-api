@@ -1,9 +1,13 @@
 package com.anthonyguidotti.spotify_api.jackson;
 
+import com.anthonyguidotti.spotify_api.model.IncludeGroup;
+import com.anthonyguidotti.spotify_api.model.RestrictionReason;
+import com.anthonyguidotti.spotify_api.model.TrackOrEpisode;
 import com.anthonyguidotti.spotify_api.response.ErrorResponse;
 import com.anthonyguidotti.spotify_api.response.SpotifyAPIResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,12 +22,22 @@ import java.util.concurrent.Flow;
 
 public class JacksonDeserializerBodySubscriber implements HttpResponse.BodySubscriber<SpotifyAPIResponse> {
     private static final Logger logger = LoggerFactory.getLogger(JacksonDeserializerBodySubscriber.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper;
 
     private List<ByteBuffer> response;
     private final CompletableFuture<SpotifyAPIResponse> future = new CompletableFuture<>();
     private final Class<? extends SpotifyAPIResponse> type;
     private volatile Flow.Subscription subscription;
+
+    static {
+        objectMapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(IncludeGroup.class, new IncludeGroupDeserializer());
+        module.addDeserializer(RestrictionReason.class, new RestrictionReasonDeserializer());
+        module.addDeserializer(TrackOrEpisode.class, new TrackOrEpisodeDeserializer());
+        module.addSerializer(RestrictionReason.class, new RestrictionReasonSerializer());
+        objectMapper.registerModule(module);
+    }
 
     public JacksonDeserializerBodySubscriber(Class<? extends SpotifyAPIResponse> type) {
         this.type = type;

@@ -8,6 +8,11 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 
 public class RestrictionReasonSerializer extends StdSerializer<RestrictionReason> {
+
+    protected RestrictionReasonSerializer() {
+        this(null);
+    }
+
     protected RestrictionReasonSerializer(Class<RestrictionReason> t) {
         super(t);
     }
