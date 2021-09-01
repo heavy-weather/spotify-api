@@ -62,8 +62,8 @@ class SpotifyApiClientTests {
 				while (!StringUtils.hasLength(authentication.getAccessnToken())) {
 					Thread.sleep(1000);
 					if (StringUtils.hasLength(authentication.getAuthorizationCode())) {
-						SpotifyAPIResponse response = spotifyClient.accessTokenSync(
-								authentication.getAuthorizationCode()).body();
+						SpotifyAPIResponse response = spotifyClient.accessToken(
+								authentication.getAuthorizationCode()).get().body();
 						if (response instanceof AccessTokenResponse) {
 							authentication.setAccessnToken(((AccessTokenResponse)response).getAccessToken());
 						} else {
@@ -71,60 +71,15 @@ class SpotifyApiClientTests {
 						}
 					}
 				}
-			} catch (IOException | InterruptedException e) {
+			} catch (IOException | InterruptedException | ExecutionException e) {
 				throw new RuntimeException("Error bootstrapping test", e);
 			}
 		}
 	}
 
 	@Test
-	public void accessTokenAsync() throws ExecutionException, InterruptedException {
-		// Can set authorizationCode to null here because we already retrieved the
-		// access token during the bootstrap phase
-		authentication.setAuthorizationCode(null);
-
-		try {
-			logger.info("\nClick to test access token asynchronous method: {}", url());
-
-			while (!StringUtils.hasLength(authentication.getAuthorizationCode())) {
-				Thread.sleep(1000);
-			}
-		} catch (MalformedURLException | InterruptedException e) {
-			throw new RuntimeException("Error bootstrapping test", e);
-		}
-
-		CompletableFuture<HttpResponse<SpotifyAPIResponse>> response = spotifyClient.accessTokenAsync(
-				authentication.getAuthorizationCode()
-		);
-
-		HttpResponse<SpotifyAPIResponse> res = response.get();
-		Assert.isTrue(res.statusCode() == 200, "Response must be successful");
-		Assert.notNull(res.body(), "Body must not be null");
-
-		SpotifyAPIResponse spotifyAPIResponse = res.body();
-		if (spotifyAPIResponse instanceof AccessTokenResponse) {
-			AccessTokenResponse body = (AccessTokenResponse) spotifyAPIResponse;
-			Assert.notNull(body.getAccessToken(), "Body must contain access token");
-		}
-	}
-
-	@Test
-	public void multipleAlbumsSync() throws IOException, InterruptedException {
-		HttpResponse<SpotifyAPIResponse> response = spotifyClient.multipleAlbumsSync(
-				authentication.getAccessnToken(), Collections.singletonList(ALBUM_ID));
-
-		Assert.isTrue(response.statusCode() == 200, "Response must be successful");
-		Assert.notNull(response.body(), "Body must not be null");
-
-		SpotifyAPIResponse spotifyAPIResponse = response.body();
-		MultipleAlbumsResponse body = (MultipleAlbumsResponse) spotifyAPIResponse;
-		Assert.notEmpty(body.getAlbums(), "Body must contain access token");
-		Assert.notNull(body.getAlbums().get(0), "Body must contain at least one album");
-	}
-
-	@Test
 	public void multipleAlbumsAsync() throws ExecutionException, InterruptedException {
-		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.multipleAlbumsAsync(
+		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.multipleAlbums(
 				authentication.getAccessnToken(), Collections.singletonList(ALBUM_ID)
 		);
 
@@ -140,21 +95,8 @@ class SpotifyApiClientTests {
 	}
 
 	@Test
-	public void singleAlbumSync() throws IOException, InterruptedException {
-		HttpResponse<SpotifyAPIResponse> response = spotifyClient.singleAlbumSync(
-				authentication.getAccessnToken(), ALBUM_ID, "ES");
-
-		Assert.isTrue(response.statusCode() == 200, "Response must be successful");
-		Assert.notNull(response.body(), "Body must not be null");
-
-		SpotifyAPIResponse spotifyAPIResponse = response.body();
-		SingleAlbumResponse body = (SingleAlbumResponse) spotifyAPIResponse;
-		Assert.notNull(body.getName(), "Body must contain access token");
-	}
-
-	@Test
 	public void singleAlbumsAsync() throws ExecutionException, InterruptedException {
-		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.singleAlbumAsync(
+		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.singleAlbum(
 				authentication.getAccessnToken(), ALBUM_ID, "ES");
 
 		HttpResponse<SpotifyAPIResponse> response = future.get();
@@ -168,22 +110,8 @@ class SpotifyApiClientTests {
 	}
 
 	@Test
-	public void albumTracksSync() throws IOException, InterruptedException {
-		HttpResponse<SpotifyAPIResponse> response = spotifyClient.albumTracksSync(
-				authentication.getAccessnToken(), ALBUM_ID, null, 0, 0);
-
-		Assert.isTrue(response.statusCode() == 200, "Response must be successful");
-		Assert.notNull(response.body(), "Body must not be null");
-
-		SpotifyAPIResponse spotifyAPIResponse = response.body();
-		AlbumTracksResponse body = (AlbumTracksResponse) spotifyAPIResponse;
-		Assert.notEmpty(body.getItems(), "Body must contain access token");
-		Assert.notNull(body.getItems().get(0), "Body must contain at least one track");
-	}
-
-	@Test
 	public void albumTracksAsync() throws ExecutionException, InterruptedException {
-		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.albumTracksAsync(
+		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.albumTracks(
 				authentication.getAccessnToken(), ALBUM_ID, null, 0, 0);
 
 		HttpResponse<SpotifyAPIResponse> response = future.get();

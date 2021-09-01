@@ -74,37 +74,26 @@ public class SpotifyClient {
         return new URL(sb.toString());
     }
 
-    private HttpRequest accessTokenRequest(String code) {
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> accessToken(String code) {
         byte[] headerBytes = (clientId + ":" + clientSecret).getBytes();
         String authHeader = "Basic " + new String(Base64Utils.encode(headerBytes));
 
-        return HttpRequest.newBuilder()
-                .uri(httpsUri(authorizationUrl, "/api/token"))
-                .header("Authorization", authHeader)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.ofString(urlEncodedKeyValueString(
-                        new String[] {"grant_type", "authorization_code"},
-                        new String[] {"code", code},
-                        new String[] {"redirect_uri", redirectUri}
-                )))
-                .build();
-    }
-
-    public HttpResponse<SpotifyAPIResponse> accessTokenSync(String code) throws IOException, InterruptedException {
-        return client.send(
-                accessTokenRequest(code),
-                (ri) -> new JacksonDeserializerBodySubscriber(AccessTokenResponse.class)
-        );
-    }
-
-    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> accessTokenAsync(String code) {
         return client.sendAsync(
-                accessTokenRequest(code),
+                HttpRequest.newBuilder()
+                        .uri(httpsUri(authorizationUrl, "/api/token"))
+                        .header("Authorization", authHeader)
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .POST(HttpRequest.BodyPublishers.ofString(urlEncodedKeyValueString(
+                                new String[] {"grant_type", "authorization_code"},
+                                new String[] {"code", code},
+                                new String[] {"redirect_uri", redirectUri}
+                        )))
+                        .build(),
                 (ri) -> new JacksonDeserializerBodySubscriber(AccessTokenResponse.class)
         );
     }
 
-    private HttpRequest multipleAlbumsRequest(
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> multipleAlbums(
             String accessToken,
             List<String> albumIds
     ) {
@@ -120,34 +109,17 @@ public class SpotifyClient {
             uri = httpsUri(apiUrl, "/albums");
         }
 
-        return HttpRequest.newBuilder()
-                .uri(uri)
-                .header("Authorization", "Bearer " + accessToken)
-                .GET()
-                .build();
-    }
-
-    public HttpResponse<SpotifyAPIResponse> multipleAlbumsSync(
-            String accessToken,
-            List<String> albumIds
-    ) throws IOException, InterruptedException {
-        return client.send(
-                multipleAlbumsRequest(accessToken, albumIds),
-                (ri) -> new JacksonDeserializerBodySubscriber(MultipleAlbumsResponse.class)
-        );
-    }
-
-    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> multipleAlbumsAsync(
-            String accessToken,
-            List<String> albumIds
-    ) {
         return client.sendAsync(
-                multipleAlbumsRequest(accessToken, albumIds),
+                HttpRequest.newBuilder()
+                        .uri(uri)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build(),
                 (ri) -> new JacksonDeserializerBodySubscriber(MultipleAlbumsResponse.class)
         );
     }
 
-    private HttpRequest singleAlbumRequest(
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> singleAlbum(
             String accessToken,
             String albumId,
             String market
@@ -155,40 +127,21 @@ public class SpotifyClient {
         if (!StringUtils.hasLength(albumId)) {
             throw new IllegalArgumentException("Parameter albumId is required");
         }
-        return HttpRequest.newBuilder()
-                .uri(httpsUri(
-                        apiUrl,
-                        "/albums/" + albumId,
-                        new String[] {"market", market}
-                ))
-                .header("Authorization", "Bearer " + accessToken)
-                .GET()
-                .build();
-    }
-
-    public HttpResponse<SpotifyAPIResponse> singleAlbumSync(
-            String accessToken,
-            String albumId,
-            String market
-    ) throws IOException, InterruptedException {
-        return client.send(
-                singleAlbumRequest(accessToken, albumId, market),
-                (ri) -> new JacksonDeserializerBodySubscriber(SingleAlbumResponse.class)
-        );
-    }
-
-    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> singleAlbumAsync(
-            String accessToken,
-            String albumId,
-            String market
-    ) {
         return client.sendAsync(
-                singleAlbumRequest(accessToken, albumId, market),
+                HttpRequest.newBuilder()
+                        .uri(httpsUri(
+                                apiUrl,
+                                "/albums/" + albumId,
+                                new String[] {"market", market}
+                        ))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build(),
                 (ri) -> new JacksonDeserializerBodySubscriber(SingleAlbumResponse.class)
         );
     }
 
-    private HttpRequest albumTracksRequest(
+    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> albumTracks(
             String accessToken,
             String albumId,
             String market,
@@ -202,41 +155,19 @@ public class SpotifyClient {
         if (offset > 0) {
             limitString = String.valueOf(limit);
         }
-        return HttpRequest.newBuilder()
-                .uri(httpsUri(
-                        apiUrl,
-                        "/albums/" + albumId + "/tracks",
-                        new String[] {"market", market},
-                        new String[] {"limit", limitString},
-                        new String[] {"offset", String.valueOf(offset)}
-                ))
-                .header("Authorization", "Bearer " + accessToken)
-                .GET()
-                .build();
-    }
 
-    public HttpResponse<SpotifyAPIResponse> albumTracksSync(
-            String accessToken,
-            String albumId,
-            String market,
-            int limit,
-            int offset
-    ) throws IOException, InterruptedException {
-        return client.send(
-                albumTracksRequest(accessToken, albumId, market, limit, offset),
-                (ri) -> new JacksonDeserializerBodySubscriber(AlbumTracksResponse.class)
-        );
-    }
-
-    public CompletableFuture<HttpResponse<SpotifyAPIResponse>> albumTracksAsync(
-            String accessToken,
-            String albumId,
-            String market,
-            int limit,
-            int offset
-    ) {
         return client.sendAsync(
-                albumTracksRequest(accessToken, albumId, market, limit, offset),
+                HttpRequest.newBuilder()
+                        .uri(httpsUri(
+                                apiUrl,
+                                "/albums/" + albumId + "/tracks",
+                                new String[] {"market", market},
+                                new String[] {"limit", limitString},
+                                new String[] {"offset", String.valueOf(offset)}
+                        ))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build(),
                 (ri) -> new JacksonDeserializerBodySubscriber(AlbumTracksResponse.class)
         );
     }
