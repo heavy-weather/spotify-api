@@ -47,19 +47,16 @@ class SpotifyApiClientTests {
 		this.authentication = authentication;
 	}
 
-	private URL url() throws MalformedURLException {
-		return spotifyClient.authorizationCodeUrl(
-				null,
-				Arrays.asList(AuthorizationScope.values()),
-				false
-		);
-	}
-
 	@BeforeEach
 	public void before() {
 		if (!StringUtils.hasLength(authentication.getAccessnToken())) {
 			try {
-				logger.info("\nClick to bootstrap tests: {}", url());
+				URL url = spotifyClient.authorizationCodeUrl(
+						null,
+						Arrays.asList(AuthorizationScope.values()),
+						false
+				);
+				logger.info("\nClick to bootstrap tests: {}", url);
 
 				while (!StringUtils.hasLength(authentication.getAccessnToken())) {
 					Thread.sleep(1000);

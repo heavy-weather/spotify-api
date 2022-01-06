@@ -2,29 +2,20 @@ package com.anthonyguidotti.spotify_api.client;
 
 import com.anthonyguidotti.spotify_api.jackson.JacksonDeserializerBodySubscriber;
 import com.anthonyguidotti.spotify_api.model.AuthorizationScope;
-import com.anthonyguidotti.spotify_api.model.CursorPagingObject;
 import com.anthonyguidotti.spotify_api.model.IncludeGroup;
-import com.anthonyguidotti.spotify_api.model.SimplifiedTrackObject;
 import com.anthonyguidotti.spotify_api.response.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.Base64Utils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class SpotifyClient {
-    private static final Logger logger = LoggerFactory.getLogger(SpotifyClient.class);
-
     private final String authorizationUrl;
     private final String apiUrl;
     private final String clientId;
@@ -58,10 +49,10 @@ public class SpotifyClient {
                 .append("?client_id=").append(URLEncoder.encode(clientId, charset))
                 .append("&response_type=code")
                 .append("&redirect_uri=").append(URLEncoder.encode(redirectUri, charset));
-        if (StringUtils.hasLength(state)) {
+        if (state != null && !state.isEmpty()) {
                 sb.append("&state=").append(URLEncoder.encode(state, charset));
         }
-        if (!CollectionUtils.isEmpty(scopes)) {
+        if (scopes != null && !scopes.isEmpty()) {
             String scopesValue = scopes.stream()
                     .map(AuthorizationScope::getName)
                     .collect(Collectors.joining(" "));
@@ -77,7 +68,8 @@ public class SpotifyClient {
 
     public CompletableFuture<HttpResponse<SpotifyAPIResponse>> accessToken(String code) {
         byte[] headerBytes = (clientId + ":" + clientSecret).getBytes();
-        String authHeader = "Basic " + new String(Base64Utils.encode(headerBytes));
+        byte[] encodedBytes = Base64.getEncoder().encode(headerBytes);
+        String authHeader = "Basic " + new String(encodedBytes);
 
         return client.sendAsync(
                 HttpRequest.newBuilder()
@@ -125,7 +117,7 @@ public class SpotifyClient {
             String albumId,
             String market
     ) {
-        if (!StringUtils.hasLength(albumId)) {
+        if (albumId == null || albumId.isEmpty()) {
             throw new IllegalArgumentException("Parameter albumId is required");
         }
         return client.sendAsync(
@@ -149,7 +141,7 @@ public class SpotifyClient {
             int limit,
             int offset
     ) {
-        if (!StringUtils.hasLength(albumId)) {
+        if (albumId == null || albumId.isEmpty()) {
             throw new IllegalArgumentException("Parameter albumId is required");
         }
         String limitString = null;
@@ -203,7 +195,7 @@ public class SpotifyClient {
             String accessToken,
             String artistId
     ) {
-        if (!StringUtils.hasLength(artistId)) {
+        if (artistId == null || artistId.isEmpty()) {
             throw new IllegalArgumentException("Parameter artistId is required");
         }
         return client.sendAsync(
@@ -221,7 +213,7 @@ public class SpotifyClient {
             String artistId,
             String market
     ) {
-        if (!StringUtils.hasLength(artistId)) {
+        if (artistId == null || artistId.isEmpty()) {
             throw new IllegalArgumentException("Parameter artistId is required");
         }
         return client.sendAsync(
@@ -242,7 +234,7 @@ public class SpotifyClient {
             String accessToken,
             String artistId
     ) {
-        if (!StringUtils.hasLength(artistId)) {
+        if (artistId == null || artistId.isEmpty()) {
             throw new IllegalArgumentException("Parameter artistId is required");
         }
         return client.sendAsync(
@@ -263,7 +255,7 @@ public class SpotifyClient {
             int limit,
             int offset
     ) {
-        if (!StringUtils.hasLength(artistId)) {
+        if (artistId == null || artistId.isEmpty()) {
             throw new IllegalArgumentException("Parameter artistId is required");
         }
         String limitString = null;
