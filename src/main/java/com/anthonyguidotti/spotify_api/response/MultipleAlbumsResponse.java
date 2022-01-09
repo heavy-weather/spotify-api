@@ -1,17 +1,17 @@
 package com.anthonyguidotti.spotify_api.response;
 
-import com.anthonyguidotti.spotify_api.model.AlbumBase;
+import com.anthonyguidotti.spotify_api.model.Album;
 
 import java.util.List;
 
 public class MultipleAlbumsResponse implements SpotifyAPIResponse {
-    private List<AlbumBase> albums;
+    private List<Album> albums;
 
-    public List<AlbumBase> getAlbums() {
+    public List<Album> getAlbums() {
         return albums;
     }
 
-    public void setAlbums(List<AlbumBase> albums) {
+    public void setAlbums(List<Album> albums) {
         this.albums = albums;
     }
 }

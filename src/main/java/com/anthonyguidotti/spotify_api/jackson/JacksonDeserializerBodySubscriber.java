@@ -3,6 +3,7 @@ package com.anthonyguidotti.spotify_api.jackson;
 import com.anthonyguidotti.spotify_api.model.IncludeGroup;
 import com.anthonyguidotti.spotify_api.model.RestrictionReason;
 import com.anthonyguidotti.spotify_api.model.TrackOrEpisode;
+import com.anthonyguidotti.spotify_api.response.AuthenticationErrorResponse;
 import com.anthonyguidotti.spotify_api.response.ErrorResponse;
 import com.anthonyguidotti.spotify_api.response.SpotifyAPIResponse;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -88,7 +89,9 @@ public class JacksonDeserializerBodySubscriber implements HttpResponse.BodySubsc
 
         try {
             JsonNode json = objectMapper.readTree(bytes);
-            if (json.has("error")) {
+            if (json.has("error_description")) {
+                future.complete(objectMapper.readValue(bytes, AuthenticationErrorResponse.class));
+            } else if (json.has("error")) {
                 future.complete(objectMapper.readValue(bytes, ErrorResponse.class));
             } else {
                 future.complete(objectMapper.readValue(bytes, type));

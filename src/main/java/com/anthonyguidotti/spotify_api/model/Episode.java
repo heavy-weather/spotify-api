@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class ShowBase {
-    @JsonProperty("available_markets")
-    List<String> availableMarkets;
-    private List<Copyright> copyrights;
+public class Episode implements TrackOrEpisode {
+    @JsonProperty("audio_preview_url")
+    private String audioPreviewUrl;
     private String description;
+    @JsonProperty("duration_ms")
+    private Integer durationMs;
     private Boolean explicit;
     @JsonProperty("external_urls")
     private ExternalUrl externalUrls;
@@ -19,30 +20,28 @@ public class ShowBase {
     private List<Image> images;
     @JsonProperty("is_externally_hosted")
     private Boolean isExternallyHosted;
+    @JsonProperty("is_playable")
+    private Boolean isPlayable;
+    private String language;
     private List<String> languages;
-    @JsonProperty("media_type")
-    private String mediaType;
     private String name;
-    private String publisher;
-    @JsonProperty("total_episodes")
-    private Integer totalEpisodes;
+    @JsonProperty("release_date")
+    private String releaseDate;
+    @JsonProperty("release_date_precision")
+    private String releaseDatePrecision;
+    private EpisodeRestriction restrictions;
+    @JsonProperty("resume_point")
+    private ResumePoint resumePoint;
+    private ShowBase show;
     private String type;
     private String uri;
 
-    public List<String> getAvailableMarkets() {
-        return availableMarkets;
+    public String getAudioPreviewUrl() {
+        return audioPreviewUrl;
     }
 
-    public void setAvailableMarkets(List<String> availableMarkets) {
-        this.availableMarkets = availableMarkets;
-    }
-
-    public List<Copyright> getCopyrights() {
-        return copyrights;
-    }
-
-    public void setCopyrights(List<Copyright> copyrights) {
-        this.copyrights = copyrights;
+    public void setAudioPreviewUrl(String audioPreviewUrl) {
+        this.audioPreviewUrl = audioPreviewUrl;
     }
 
     public String getDescription() {
@@ -51,6 +50,14 @@ public class ShowBase {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getDurationMs() {
+        return durationMs;
+    }
+
+    public void setDurationMs(Integer durationMs) {
+        this.durationMs = durationMs;
     }
 
     public Boolean getExplicit() {
@@ -109,20 +116,28 @@ public class ShowBase {
         isExternallyHosted = externallyHosted;
     }
 
+    public Boolean getPlayable() {
+        return isPlayable;
+    }
+
+    public void setPlayable(Boolean playable) {
+        isPlayable = playable;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
     public List<String> getLanguages() {
         return languages;
     }
 
     public void setLanguages(List<String> languages) {
         this.languages = languages;
-    }
-
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    public void setMediaType(String mediaType) {
-        this.mediaType = mediaType;
     }
 
     public String getName() {
@@ -133,12 +148,36 @@ public class ShowBase {
         this.name = name;
     }
 
-    public String getPublisher() {
-        return publisher;
+    public String getReleaseDate() {
+        return releaseDate;
     }
 
-    public void setPublisher(String publisher) {
-        this.publisher = publisher;
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getReleaseDatePrecision() {
+        return releaseDatePrecision;
+    }
+
+    public void setReleaseDatePrecision(String releaseDatePrecision) {
+        this.releaseDatePrecision = releaseDatePrecision;
+    }
+
+    public EpisodeRestriction getRestrictions() {
+        return restrictions;
+    }
+
+    public void setRestrictions(EpisodeRestriction restrictions) {
+        this.restrictions = restrictions;
+    }
+
+    public ResumePoint getResumePoint() {
+        return resumePoint;
+    }
+
+    public void setResumePoint(ResumePoint resumePoint) {
+        this.resumePoint = resumePoint;
     }
 
     public String getType() {
@@ -157,11 +196,11 @@ public class ShowBase {
         this.uri = uri;
     }
 
-    public Integer getTotalEpisodes() {
-        return totalEpisodes;
+    public ShowBase getShow() {
+        return show;
     }
 
-    public void setTotalEpisodes(Integer totalEpisodes) {
-        this.totalEpisodes = totalEpisodes;
+    public void setShow(ShowBase show) {
+        this.show = show;
     }
 }

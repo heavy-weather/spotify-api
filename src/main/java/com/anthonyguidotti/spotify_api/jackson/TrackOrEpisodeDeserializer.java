@@ -1,7 +1,7 @@
 package com.anthonyguidotti.spotify_api.jackson;
 
-import com.anthonyguidotti.spotify_api.model.EpisodeBase;
-import com.anthonyguidotti.spotify_api.model.TrackObject;
+import com.anthonyguidotti.spotify_api.model.Episode;
+import com.anthonyguidotti.spotify_api.model.Track;
 import com.anthonyguidotti.spotify_api.model.TrackOrEpisode;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,9 +32,9 @@ public class TrackOrEpisodeDeserializer extends StdDeserializer<TrackOrEpisode> 
                 json.has("disc_number") ||
                 json.has("linked_from") ||
                 json.has("track_number")) {
-            return objectMapper.readValue(p, TrackObject.class);
+            return objectMapper.readValue(p, Track.class);
         } else {
-            return objectMapper.readValue(p, EpisodeBase.class);
+            return objectMapper.readValue(p, Episode.class);
         }
     }
 }

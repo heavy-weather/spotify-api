@@ -1,7 +1,7 @@
 package com.anthonyguidotti.spotify_api.response;
 
-import com.anthonyguidotti.spotify_api.model.ArtistObject;
+import com.anthonyguidotti.spotify_api.model.Artist;
 
-public class SingleArtistResponse extends ArtistObject implements SpotifyAPIResponse {
+public class SingleArtistResponse extends Artist implements SpotifyAPIResponse {
 
 }

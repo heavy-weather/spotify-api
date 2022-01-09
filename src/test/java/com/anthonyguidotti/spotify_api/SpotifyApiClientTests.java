@@ -1,7 +1,8 @@
 package com.anthonyguidotti.spotify_api;
 
-import com.anthonyguidotti.spotify_api.client.SpotifyClient;
+import com.anthonyguidotti.spotify_api.client.SpotifyAsyncClient;
 import com.anthonyguidotti.spotify_api.model.AuthorizationScope;
+import com.anthonyguidotti.spotify_api.model.CountryCode;
 import com.anthonyguidotti.spotify_api.model.IncludeGroup;
 import com.anthonyguidotti.spotify_api.response.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +15,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
@@ -34,15 +34,16 @@ import java.util.concurrent.ExecutionException;
 class SpotifyApiClientTests {
 	private static final Logger logger = LoggerFactory.getLogger(SpotifyApiClientTests.class);
 
-	private final SpotifyClient spotifyClient;
+	private final SpotifyAsyncClient spotifyClient;
 	private final Authentication authentication;
 
 	// Constants
 	private final String ALBUM_ID = "382ObEPsp2rxGrnsizN5TX";
 	private final String ARTIST_ID = "2CIMQHirSU0MQqyYHq0eOx";
+	private final CountryCode countryCode = CountryCode.US;
 
 	@Autowired
-	public SpotifyApiClientTests(SpotifyClient spotifyClient, Authentication authentication) {
+	public SpotifyApiClientTests(SpotifyAsyncClient spotifyClient, Authentication authentication) {
 		this.spotifyClient = spotifyClient;
 		this.authentication = authentication;
 	}
@@ -96,7 +97,7 @@ class SpotifyApiClientTests {
 	@Test
 	public void singleAlbums() throws ExecutionException, InterruptedException {
 		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.singleAlbum(
-				authentication.getAccessnToken(), ALBUM_ID, "ES");
+				authentication.getAccessnToken(), ALBUM_ID, countryCode);
 
 		HttpResponse<SpotifyAPIResponse> response = future.get();
 
@@ -111,7 +112,7 @@ class SpotifyApiClientTests {
 	@Test
 	public void albumTracks() throws ExecutionException, InterruptedException {
 		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.albumTracks(
-				authentication.getAccessnToken(), ALBUM_ID, null, 0, 0);
+				authentication.getAccessnToken(), ALBUM_ID, countryCode, 0, 0);
 
 		HttpResponse<SpotifyAPIResponse> response = future.get();
 
@@ -160,7 +161,7 @@ class SpotifyApiClientTests {
 	@Test
 	public void artistTopTracks() throws ExecutionException, InterruptedException {
 		CompletableFuture<HttpResponse<SpotifyAPIResponse>> future = spotifyClient.artistTopTracks(
-				authentication.getAccessnToken(), ARTIST_ID, "US"
+				authentication.getAccessnToken(), ARTIST_ID, countryCode
 		);
 
 		HttpResponse<SpotifyAPIResponse> response = future.get();
@@ -195,7 +196,7 @@ class SpotifyApiClientTests {
 				authentication.getAccessnToken(),
 				"0TnOYISbd1XYRBk9myaseg",
 				Arrays.asList(IncludeGroup.SINGLE, IncludeGroup.APPEARS_ON),
-				"ES",
+				countryCode,
 				0,
 				0
 		);

@@ -1,15 +1,15 @@
 package com.anthonyguidotti.spotify_api.response;
 
-import com.anthonyguidotti.spotify_api.model.ErrorObject;
+import com.anthonyguidotti.spotify_api.model.Error;
 
 public class ErrorResponse implements SpotifyAPIResponse {
-    private ErrorObject error;
+    private Error error;
 
-    public ErrorObject getError() {
+    public Error getError() {
         return error;
     }
 
-    public void setError(ErrorObject error) {
+    public void setError(Error error) {
         this.error = error;
     }
 }
